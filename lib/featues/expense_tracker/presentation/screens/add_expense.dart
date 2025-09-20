@@ -13,7 +13,9 @@ class AddExpense extends StatefulWidget {
 }
 
 class _AddExpenseState extends State<AddExpense> {
+  TextEditingController amountController = TextEditingController(); 
   TextEditingController dateController = TextEditingController();
+
   String? selectedCategory;
   DateTime? selectedDate;
   DateTime today = DateTime.now();

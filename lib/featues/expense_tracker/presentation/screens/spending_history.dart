@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:spendly/core/constants/app_colors.dart';
 import 'package:spendly/featues/expense_tracker/presentation/widgets/my_topbar.dart';
 
 class SpendingHistory extends StatelessWidget {

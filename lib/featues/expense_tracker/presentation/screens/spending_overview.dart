@@ -29,7 +29,7 @@ class SpendingOverview extends StatelessWidget {
                       child: SingleChildScrollView(
                         child: Column(
                           children: [
-                            MyTopbar(pageName: "Spendings History",),
+                            MyTopbar(pageName: "Spendings Overview",),
                           ],
                         ),
                       ),

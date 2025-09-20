@@ -1,24 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:spendly/core/constants/app_colors.dart';
+import 'package:spendly/featues/expense_tracker/data/models/user_model.dart';
 import 'package:spendly/featues/expense_tracker/presentation/screens/add_expense.dart';
 import 'package:spendly/featues/expense_tracker/presentation/screens/spending_history.dart';
 import 'package:spendly/featues/expense_tracker/presentation/screens/spending_overview.dart';
+import 'package:spendly/featues/expense_tracker/presentation/widgets/my_drawer.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   String selected = 'today';
+  late Box settingsBox ;
+  late Box userBox;
+  
+  @override
+  void initState() {
+    super.initState();
+    settingsBox= Hive.box('settingsBox');
+    userBox = Hive.box<User>('users');
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userID=settingsBox.get('currentUser');
+    final user= userBox.get(userID) as User?;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(backgroundColor: AppColors.primaryTealColor),
-      drawer: _myDrawer(),
+      drawer: MyDrawer(user: user,),
       bottomNavigationBar: bottomNav(),
       body: SafeArea(
         child: Column(
@@ -88,6 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                     SizedBox(height: 20),
+                    selected=="today"?
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -104,7 +121,23 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ],
-                    ),
+                    ):Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "September 2025",
+                          style: TextTheme.of(context).bodyLarge,
+                        ),
+                        Text(
+                          "2,000",
+                          style: TextStyle(
+                            color: Colors.red.shade800,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    )
                   ],
                 ),
               ),
@@ -114,33 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-  //Drawer section
-  Drawer _myDrawer() {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: AppColors.primaryTealColor,
-              borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(30),
-              ),
-            ),
-            child: Text(
-              "Hi Shijas...",
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          ListTile(
-            leading: Icon(Icons.logout, color: Colors.red),
-            title: Text("Logout"),
-            onTap: () {},
-          ),
-        ],
-      ),
-    );
-  }
+  
 
   //Bottom NAvigation//////
   Padding bottomNav() {
