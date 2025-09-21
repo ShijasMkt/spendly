@@ -11,7 +11,7 @@ class Category extends HiveObject{
   String name;
 
   @HiveField(2)
-  Icon icon;
+  IconData icon;
 
   Category({
     required this.id,

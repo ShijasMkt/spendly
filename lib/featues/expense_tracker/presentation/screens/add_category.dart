@@ -1,9 +1,6 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_iconpicker/Models/configuration.dart';
-import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:spendly/core/constants/app_buttons.dart';
+import 'package:spendly/featues/expense_tracker/presentation/widgets/custom_icon_picker.dart';
 import 'package:spendly/featues/expense_tracker/presentation/widgets/my_topbar.dart';
 
 class AddCategory extends StatefulWidget {
@@ -14,23 +11,19 @@ class AddCategory extends StatefulWidget {
 }
 
 class _AddCategoryState extends State<AddCategory> {
-  Icon? _icon;
-
+  IconData? selectedIcon;
   Future<void> _pickIcon() async {
-    IconPickerIcon? icon = await  showIconPicker(
-      context,
-      configuration: SinglePickerConfiguration(
-        iconPackModes: [IconPack.allMaterial],
-      ),
+    selectedIcon=await showModalBottomSheet(context: context, builder: (context) {
+      return CustomIconPicker(onIconSelected: (icon){
+        Navigator.pop(context,icon);
+        setState(() {
+          selectedIcon=icon;
+        });
+      });
       
-    );
-
-    // setState(() {
-
-    //   _icon = Icon(icon!.data);
-    //   log(icon.name);
-    // });
-  }
+    },);
+    
+  } 
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +58,7 @@ class _AddCategoryState extends State<AddCategory> {
                                 label: Text("Category Name"),
                               ),
                             ),
-
+                            Icon(selectedIcon),
                             SizedBox(height: 20),
                             ElevatedButton(
                               onPressed: _pickIcon,
