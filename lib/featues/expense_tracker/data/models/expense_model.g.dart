@@ -19,8 +19,8 @@ class ExpenseAdapter extends TypeAdapter<Expense> {
     return Expense(
       userID: fields[0] as String,
       amount: fields[1] as double,
-      date: fields[2] as DateTime,
-      categoryID: fields[3] as String,
+      date: fields[2] as DateTime?,
+      categoryID: fields[3] as int?,
     );
   }
 

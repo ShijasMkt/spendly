@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:spendly/core/constants/app_buttons.dart';
 import 'package:spendly/core/constants/app_colors.dart';
+import 'package:spendly/featues/expense_tracker/data/models/category_model.dart';
+import 'package:spendly/featues/expense_tracker/data/models/expense_model.dart';
+import 'package:spendly/featues/expense_tracker/data/models/user_model.dart';
+import 'package:spendly/featues/expense_tracker/presentation/screens/add_category.dart';
 import 'package:spendly/featues/expense_tracker/presentation/widgets/my_topbar.dart';
 
 class AddExpense extends StatefulWidget {
@@ -13,18 +18,27 @@ class AddExpense extends StatefulWidget {
 }
 
 class _AddExpenseState extends State<AddExpense> {
-  TextEditingController amountController = TextEditingController(); 
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  TextEditingController amountController = TextEditingController();
   TextEditingController dateController = TextEditingController();
+  TextEditingController noteController = TextEditingController();
+  final expenseBox = Hive.box<Expense>('expenses');
+  final categoryBox = Hive.box<Category>('categories');
 
-  String? selectedCategory;
+  late Box settingsBox;
+  late Box userBox;
+
+  int? selectedCategory;
   DateTime? selectedDate;
   DateTime today = DateTime.now();
 
   @override
   void initState() {
-    selectedDate = today;
-    dateController.text = DateFormat('dd-MM-yyyy').format(today);
     super.initState();
+    selectedDate = DateTime(today.year, today.month, today.day);
+    dateController.text = DateFormat('dd-MM-yyyy').format(today);
+    settingsBox = Hive.box('settingsBox');
+    userBox = Hive.box<User>('users');
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -38,12 +52,39 @@ class _AddExpenseState extends State<AddExpense> {
     if (picked != null) {
       setState(() {
         dateController.text = DateFormat('dd-MM-yyyy').format(picked);
+        selectedDate = DateTime(picked.year, picked.month, picked.day);
       });
     }
   }
 
+  void saveExpense() {
+    final amount = double.parse(amountController.text.trim());
+    final userID = settingsBox.get('currentUser');
+
+    final newExpense = Expense(
+      userID: userID,
+      amount: amount,
+      date: selectedDate,
+      categoryID: selectedCategory,
+    );
+    expenseBox.add(newExpense);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.green,
+        content: Text("Expense added!"),
+      ),
+    );
+    amountController.clear();
+    noteController.clear();
+    setState(() {
+      selectedCategory=null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final categories = categoryBox.values.toList();
+
     return Scaffold(
       appBar: AppBar(automaticallyImplyLeading: false),
       body: SafeArea(
@@ -67,70 +108,70 @@ class _AddExpenseState extends State<AddExpense> {
                     SizedBox(height: 10),
                     Expanded(
                       child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(30),
-                                    color: AppColors.primaryTealColor,
+                        child: Form(
+                          key: formKey,
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(30),
+                                      color: AppColors.primaryTealColor,
+                                    ),
+                                    child: Text(
+                                      "  INR  ",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ),
-                                  child: Text(
-                                    "  INR  ",
-                                    style: TextStyle(color: Colors.white),
+                                  SizedBox(width: 20),
+                                  SizedBox(
+                                    width: 165,
+                                    child: TextFormField(
+                                      controller: amountController,
+                                      keyboardType: TextInputType.number,
+                                      autofocus: true,
+                                      inputFormatters: [
+                                        LengthLimitingTextInputFormatter(12),
+                                        FilteringTextInputFormatter.digitsOnly,
+                                      ],
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return "Please enter the amount";
+                                        }
+                                        return null;
+                                      },
+                                    ),
                                   ),
-                                ),
-                                SizedBox(width: 20),
-                                SizedBox(
-                                  width: 165,
-                                  child: TextFormField(
-                                    keyboardType: TextInputType.number,
-                                    autofocus: true,
-                                    inputFormatters: [
-                                      LengthLimitingTextInputFormatter(12),
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 20),
-                            DropdownButton(
-                              isExpanded: true,
-                              icon: Icon(Icons.arrow_forward_ios),
-                              hint: Text(
-                                "Choose a category",
-                                style: TextStyle(color: Color(0xffd5d5d5)),
+                                ],
                               ),
-                              value: selectedCategory,
-                              items:
-                                  [
-                                    {"label": "Food", "icon": Icons.fastfood},
-                                    {
-                                      "label": "Travel",
-                                      "icon": Icons.directions_bus,
-                                    },
-                                    {
-                                      "label": "Entertainment",
-                                      "icon": Icons.movie,
-                                    },
-                                    {
-                                      "label": "Shopping",
-                                      "icon": Icons.shopping_bag
-                                    }
-                                  ].map((item) {
-                                    return DropdownMenuItem(
-                                      value: item["label"] as String,
+                              SizedBox(height: 20),
+                              DropdownButton(
+                                isExpanded: true,
+                                icon: Icon(Icons.arrow_forward_ios),
+                                hint: Text(
+                                  "Choose a category",
+                                  style: TextStyle(color: Color(0xffd5d5d5)),
+                                ),
+                                value: selectedCategory,
+                                items: [
+                                  ...categories.map((item) {
+                                    return DropdownMenuItem<int>(
+                                      value: item.key as int,
                                       child: Row(
                                         children: [
                                           SizedBox(width: 12),
-                                          Icon(item["icon"] as IconData),
+                                          Icon(
+                                            IconData(
+                                              item.iconCode,
+                                              fontFamily: 'MaterialIcons',
+                                            ),
+                                          ),
                                           SizedBox(width: 10),
                                           Text(
-                                            item["label"] as String,
+                                            item.name,
                                             style: TextTheme.of(
                                               context,
                                             ).bodyLarge,
@@ -139,42 +180,91 @@ class _AddExpenseState extends State<AddExpense> {
                                       ),
                                     );
                                   }).toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedCategory = value;
-                                });
-                              },
-                            ),
-                            SizedBox(height: 10),
-                            TextFormField(
-                              controller: dateController,
-                              onTap: () {
-                                _selectDate(context);
-                              },
-                              readOnly: true,
-                              decoration: InputDecoration(
-                                prefixIcon: IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(Icons.edit_calendar),
+                                  DropdownMenuItem<int>(
+                                    value: -1,
+                                    child: Container(
+                                      padding: EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                        color: Color(0xffd5d5d5),
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+
+                                      child: Row(
+                                        children: [
+                                          SizedBox(width: 12),
+                                          Icon(Icons.add),
+                                          SizedBox(width: 10),
+                                          Text(
+                                            "Add new Category",
+                                            style: TextTheme.of(
+                                              context,
+                                            ).bodyLarge,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                onChanged: (value) {
+                                  if (value == -1) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => AddCategory(),
+                                      ),
+                                    );
+                                    setState(() {
+                                      selectedCategory = null;
+                                    });
+                                  } else {
+                                    setState(() {
+                                      selectedCategory = value;
+                                    });
+                                  }
+                                },
+                              ),
+                              SizedBox(height: 10),
+                              TextFormField(
+                                controller: dateController,
+                                onTap: () {
+                                  _selectDate(context);
+                                },
+                                readOnly: true,
+                                decoration: InputDecoration(
+                                  prefixIcon: IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(Icons.edit_calendar),
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return "Please give a date";
+                                  }
+                                  return null;
+                                },
+                              ),
+                              SizedBox(height: 10),
+                              TextFormField(
+                                controller: noteController,
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(Icons.notes),
+                                  hint: Text(
+                                    "Notes",
+                                    style: TextStyle(color: Color(0xffd5d5d5)),
+                                  ),
                                 ),
                               ),
-                            ),
-                            SizedBox(height: 10),
-                            TextFormField(
-                              decoration: InputDecoration(
-                                prefixIcon: Icon(Icons.notes),
-                                hint: Text(
-                                  "Notes",
-                                  style: TextStyle(color: Color(0xffd5d5d5)),
-                                ),
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        if (formKey.currentState!.validate()) {
+                          saveExpense();
+                        }
+                      },
                       style: AppButtons.mainPinkButton,
                       child: Text("Add"),
                     ),

@@ -8,8 +8,8 @@ class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});
 
   @override
-  Widget build(BuildContext context,WidgetRef ref) {
-    final isLoggedIn=ref.watch(authProvider);
-    return isLoggedIn? HomeScreen():OnboardingScreen();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isLoggedIn = ref.watch(authProvider);
+    return isLoggedIn ? HomeScreen() : OnboardingScreen();
   }
 }

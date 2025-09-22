@@ -10,10 +10,10 @@ class Expense extends HiveObject{
   double amount;
 
   @HiveField(2)
-  DateTime date;
+  DateTime? date;
 
   @HiveField(3)
-  String categoryID;
+  int? categoryID;
 
   Expense({
     required this.userID,

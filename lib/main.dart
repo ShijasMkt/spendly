@@ -15,13 +15,13 @@ void main() async{
   Hive.registerAdapter(UserAdapter());
   Hive.registerAdapter((ExpenseAdapter()));
   Hive.registerAdapter(CategoryAdapter());
-  //opening hive boxes
+  //opening hive boxes-
   await Hive.openBox('settingsBox');
   await Hive.openBox<User>('users');
   await Hive.openBox<Expense>('expenses');
   await Hive.openBox<Category>('categories');
-  // final userBox = Hive.box<User>('Users');
-  // await userBox.clear();
+  // final expBox = Hive.box<Expense>('expenses');
+  // await expBox.clear();
   runApp(ProviderScope(child: const MyApp()));
 }
 
