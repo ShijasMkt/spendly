@@ -11,6 +11,40 @@ class CategoryTile extends StatefulWidget {
 }
 
 class _CategoryTileState extends State<CategoryTile> {
+  void deleteCategory() {
+    widget.category.delete();
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("Category Deleted!")));
+  }
+
+  void showDeleteDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          content: Text("Do you really want to delete?"),
+          actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: Icon(Icons.cancel_outlined),
+            ),
+            IconButton(
+              onPressed: () {
+                deleteCategory();
+                Navigator.pop(context);
+              },
+              icon: Icon(Icons.delete),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -29,7 +63,7 @@ class _CategoryTileState extends State<CategoryTile> {
                 IconData(widget.category.iconCode, fontFamily: 'MaterialIcons'),
                 color: Colors.white,
               ),
-              SizedBox(width: 10,),
+              SizedBox(width: 10),
               Text(
                 widget.category.name,
                 style: TextTheme.of(context).titleMedium,
@@ -37,7 +71,13 @@ class _CategoryTileState extends State<CategoryTile> {
             ],
           ),
 
-          IconButton(onPressed: () {}, icon: Icon(Icons.delete),color: AppColors.highlightRedColor,),
+          IconButton(
+            onPressed: () {
+              showDeleteDialog();
+            },
+            icon: Icon(Icons.delete),
+            color: AppColors.highlightRedColor,
+          ),
         ],
       ),
     );

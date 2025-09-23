@@ -11,7 +11,9 @@ import 'package:spendly/featues/expense_tracker/presentation/screens/add_categor
 import 'package:spendly/featues/expense_tracker/presentation/widgets/my_topbar.dart';
 
 class AddExpense extends StatefulWidget {
-  const AddExpense({super.key});
+  final VoidCallback? onExpenseAdded;
+
+  const AddExpense({super.key,this.onExpenseAdded});
 
   @override
   State<AddExpense> createState() => _AddExpenseState();
@@ -68,17 +70,20 @@ class _AddExpenseState extends State<AddExpense> {
       categoryID: selectedCategory,
     );
     expenseBox.add(newExpense);
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: Colors.green,
         content: Text("Expense added!"),
       ),
     );
+    widget.onExpenseAdded?.call();
     amountController.clear();
     noteController.clear();
     setState(() {
       selectedCategory=null;
     });
+
   }
 
   @override

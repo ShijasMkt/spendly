@@ -14,6 +14,7 @@ class SpendingHistory extends StatelessWidget {
   Widget build(BuildContext context) {
     final expenseBox = Hive.box<Expense>('expenses');
     final categoryBox = Hive.box<Category>('categories');
+    final settingsBox = Hive.box('settingsBox');
 
     return Scaffold(
       appBar: AppBar(automaticallyImplyLeading: false),
@@ -40,8 +41,13 @@ class SpendingHistory extends StatelessWidget {
                       child: ValueListenableBuilder(
                         valueListenable: expenseBox.listenable(),
                         builder: (context, Box<Expense> box, _) {
-                          var expenses = box.values.toList();
-                          expenses=sortByDate(expenses);
+                          final userID = settingsBox.get('currentUser');
+
+                          var expenses = box.values
+                              .cast<Expense>()
+                              .where((expense) => expense.userID == userID)
+                              .toList();
+                          expenses = sortByDate(expenses);
                           if (expenses.isEmpty) {
                             return Text("No Expenses!");
                           }
@@ -58,7 +64,12 @@ class SpendingHistory extends StatelessWidget {
                               return Container(
                                 padding: EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  border: BoxBorder.symmetric(horizontal: BorderSide(color: Colors.black,width: 1))
+                                  border: BoxBorder.symmetric(
+                                    horizontal: BorderSide(
+                                      color: Colors.black,
+                                      width: 1,
+                                    ),
+                                  ),
                                 ),
                                 child: Row(
                                   mainAxisAlignment:
@@ -71,7 +82,12 @@ class SpendingHistory extends StatelessWidget {
                                       ),
                                     ),
                                     Text(expenseDate),
-                                    Text("₹${expense.amount.toString()}",style: TextStyle(color: AppColors.highlightRedColor),),
+                                    Text(
+                                      "₹${expense.amount.toString()}",
+                                      style: TextStyle(
+                                        color: AppColors.highlightRedColor,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               );
