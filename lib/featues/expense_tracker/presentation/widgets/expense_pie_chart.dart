@@ -1,10 +1,10 @@
-import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class ExpensePieChart extends StatelessWidget {
   final Map<String, double> categoryTotals; 
-  const ExpensePieChart({super.key,required this.categoryTotals});
+  final Map<String, Color> categoryColors;
+  const ExpensePieChart({super.key,required this.categoryTotals,required this.categoryColors});
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +20,8 @@ class ExpensePieChart extends StatelessWidget {
     }
     return PieChart(PieChartData(
       sections: categoryTotals.entries.map((index){
-        final random=Random(index.hashCode);
         return PieChartSectionData(
-          color: Color.fromARGB(255, random.nextInt(255), random.nextInt(255) , random.nextInt(255)),
+          color: categoryColors[index.key],
           value: index.value,
           title: "${calculatePercent(index.value).toStringAsFixed(2)}%",
           radius: 80,

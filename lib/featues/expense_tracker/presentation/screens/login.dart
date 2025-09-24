@@ -74,100 +74,117 @@ class _LoginState extends ConsumerState<Login> {
 
     return Scaffold(
       appBar: AppBar(backgroundColor: AppColors.primaryTealColor),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Form(
-            key: formkey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      "Welcome Back!",
-                      style: TextTheme.of(context).titleLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    Text(
-                      "Log in to continue your journey",
-                      style: TextTheme.of(context).titleSmall,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+      body: _loginBody(
+        formkey,
+        context,
+        userNameController,
+        passwordController,
+        checkLogin,
+      ),
+    );
+  }
 
-                SizedBox(height: 30),
-                TextFormField(
-                  style: TextStyle(color: Colors.white),
-                  controller: userNameController,
-                  keyboardType: TextInputType.name,
-                  decoration: InputDecoration(
-                    hintText: "Enter your username",
-                    hintStyle: TextStyle(color: Colors.white),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
+  //body
+  SafeArea _loginBody(
+    GlobalKey<FormState> formkey,
+    BuildContext context,
+    TextEditingController userNameController,
+    TextEditingController passwordController,
+    Future<void> Function() checkLogin,
+  ) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: formkey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Column(
+                children: [
+                  Text(
+                    "Welcome Back!",
+                    style: TextTheme.of(context).titleLarge,
+                    textAlign: TextAlign.center,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter a valid username";
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 10),
-                TextFormField(
-                  style: TextStyle(color: Colors.white),
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    hintText: "Enter your password",
-                    hintStyle: TextStyle(color: Colors.white),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
+                  Text(
+                    "Log in to continue your journey",
+                    style: TextTheme.of(context).titleSmall,
+                    textAlign: TextAlign.center,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter your password";
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 10),
-                Row(
-                  children: [
-                    Text("New User?", style: TextStyle(fontSize: 14)),
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => Register()),
-                        );
-                      },
-                      child: Text(
-                        " Register here",
-                        style: TextStyle(fontSize: 14, color: Colors.purple),
-                      ),
-                    ),
-                  ],
-                ),
-                Spacer(),
-                ElevatedButton(
-                  style: AppButtons.mainPinkButton,
-                  onPressed: () {
-                    if (formkey.currentState!.validate()) {
-                      checkLogin();
-                    }
-                  },
-                  child: Text(
-                    "Login",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                ],
+              ),
+
+              SizedBox(height: 30),
+              TextFormField(
+                style: TextStyle(color: Colors.white),
+                controller: userNameController,
+                keyboardType: TextInputType.name,
+                decoration: InputDecoration(
+                  hintText: "Enter your username",
+                  hintStyle: TextStyle(color: Colors.white),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
                 ),
-              ],
-            ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter a valid username";
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                style: TextStyle(color: Colors.white),
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: "Enter your password",
+                  hintStyle: TextStyle(color: Colors.white),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter your password";
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Text("New User?", style: TextStyle(fontSize: 14)),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => Register()),
+                      );
+                    },
+                    child: Text(
+                      " Register here",
+                      style: TextStyle(fontSize: 14, color: Colors.purple),
+                    ),
+                  ),
+                ],
+              ),
+              Spacer(),
+              ElevatedButton(
+                style: AppButtons.mainPinkButton,
+                onPressed: () {
+                  if (formkey.currentState!.validate()) {
+                    checkLogin();
+                  }
+                },
+                child: Text(
+                  "Login",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -43,12 +43,9 @@ class _RegisterState extends ConsumerState<Register> {
       }
 
       final userID = DateTime.now().microsecondsSinceEpoch.toString();
-
       final newUser = User(id: userID, uName: userName);
 
-      
       await secureStorage.write(key: 'password_$userID', value: password);
-      
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -56,100 +53,119 @@ class _RegisterState extends ConsumerState<Register> {
           content: Text("User registered!"),
         ),
       );
-      userBox.put(userID,newUser);
+      userBox.put(userID, newUser);
 
       settingsBox.put('isLoggedIn', true);
       settingsBox.put('currentUser', userID);
 
       ref.read(authProvider.notifier).login();
       Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => HomeScreen()),
-            (route) => false,
-          );
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen()),
+        (route) => false,
+      );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.primaryTealColor,
-        iconTheme: IconThemeData(color: Colors.white),
+      appBar: _registerAppBar(),
+      body: _registerBody(
+        formkey,
+        context,
+        uNameController,
+        passwordController,
+        saveUser,
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Form(
-            key: formkey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      "Let's Personalize Your Journeys",
-                      style: TextTheme.of(context).titleLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    Text(
-                      "Tell us a bit about yourself",
-                      style: TextTheme.of(context).titleSmall,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+    );
+  }
 
-                SizedBox(height: 30),
-                TextFormField(
-                  style: TextStyle(color: Colors.white),
-                  controller: uNameController,
-                  keyboardType: TextInputType.name,
-                  decoration: InputDecoration(
-                    hintText: "Enter a username",
-                    hintStyle: TextStyle(color: Colors.white),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
+  //appBar
+  AppBar _registerAppBar() {
+    return AppBar(
+      backgroundColor: AppColors.primaryTealColor,
+      iconTheme: IconThemeData(color: Colors.white),
+    );
+  }
+
+  //body
+  SafeArea _registerBody(
+    GlobalKey<FormState> formkey,
+    BuildContext context,
+    TextEditingController uNameController,
+    TextEditingController passwordController,
+    Future<void> Function() saveUser,
+  ) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: formkey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Column(
+                children: [
+                  Text(
+                    "Let's Personalize Your Journeys",
+                    style: TextTheme.of(context).titleLarge,
+                    textAlign: TextAlign.center,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter a valid name";
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 10),
-                TextFormField(
-                  style: TextStyle(color: Colors.white),
-                  obscureText: true,
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                    hintText: "Enter a password",
-                    hintStyle: TextStyle(color: Colors.white),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
+                  Text(
+                    "Tell us a bit about yourself",
+                    style: TextTheme.of(context).titleSmall,
+                    textAlign: TextAlign.center,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter a password";
-                    }
-                    return null;
-                  },
-                ),
-                Spacer(),
-                ElevatedButton(
-                  style: AppButtons.mainPinkButton,
-                  onPressed: () {
-                    if (formkey.currentState!.validate()) {
-                      saveUser();
-                    }
-                  },
-                  child: Text(
-                    "Register",
-                    style: TextStyle(color: Colors.white),
+                ],
+              ),
+
+              SizedBox(height: 30),
+              TextFormField(
+                style: TextStyle(color: Colors.white),
+                controller: uNameController,
+                keyboardType: TextInputType.name,
+                decoration: InputDecoration(
+                  hintText: "Enter a username",
+                  hintStyle: TextStyle(color: Colors.white),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
                 ),
-              ],
-            ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter a valid name";
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                style: TextStyle(color: Colors.white),
+                obscureText: true,
+                controller: passwordController,
+                decoration: InputDecoration(
+                  hintText: "Enter a password",
+                  hintStyle: TextStyle(color: Colors.white),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter a password";
+                  }
+                  return null;
+                },
+              ),
+              Spacer(),
+              ElevatedButton(
+                style: AppButtons.mainPinkButton,
+                onPressed: () {
+                  if (formkey.currentState!.validate()) {
+                    saveUser();
+                  }
+                },
+                child: Text("Register", style: TextStyle(color: Colors.white)),
+              ),
+            ],
           ),
         ),
       ),

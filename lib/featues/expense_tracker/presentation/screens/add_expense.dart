@@ -13,7 +13,7 @@ import 'package:spendly/featues/expense_tracker/presentation/widgets/my_topbar.d
 class AddExpense extends StatefulWidget {
   final VoidCallback? onExpenseAdded;
 
-  const AddExpense({super.key,this.onExpenseAdded});
+  const AddExpense({super.key, this.onExpenseAdded});
 
   @override
   State<AddExpense> createState() => _AddExpenseState();
@@ -72,18 +72,14 @@ class _AddExpenseState extends State<AddExpense> {
     expenseBox.add(newExpense);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.green,
-        content: Text("Expense added!"),
-      ),
+      SnackBar(backgroundColor: Colors.green, content: Text("Expense added!")),
     );
     widget.onExpenseAdded?.call();
     amountController.clear();
     noteController.clear();
     setState(() {
-      selectedCategory=null;
+      selectedCategory = null;
     });
-
   }
 
   @override
@@ -92,191 +88,195 @@ class _AddExpenseState extends State<AddExpense> {
 
     return Scaffold(
       appBar: AppBar(automaticallyImplyLeading: false),
-      body: SafeArea(
-        child: Column(
-          children: [
-            SizedBox(height: 10),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.all(15),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
-                ),
+      body: _addExpenseBody(categories, context),
+    );
+  }
+
+  //body
+  SafeArea _addExpenseBody(List<Category> categories, BuildContext context) {
+    return SafeArea(
+      child: Column(
+        children: [
+          SizedBox(height: 10),
+          Expanded(child: _whiteBody(categories, context)),
+        ],
+      ),
+    );
+  }
+
+  //whitebody
+  Container _whiteBody(List<Category> categories, BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(15),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+      ),
+      child: Column(
+        children: [
+          MyTopbar(pageName: "Add Expense"),
+          SizedBox(height: 10),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Form(
+                key: formKey,
                 child: Column(
                   children: [
-                    MyTopbar(pageName: "Add Expense"),
-                    SizedBox(height: 10),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Form(
-                          key: formKey,
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(30),
-                                      color: AppColors.primaryTealColor,
-                                    ),
-                                    child: Text(
-                                      "  INR  ",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  ),
-                                  SizedBox(width: 20),
-                                  SizedBox(
-                                    width: 165,
-                                    child: TextFormField(
-                                      controller: amountController,
-                                      keyboardType: TextInputType.number,
-                                      autofocus: true,
-                                      inputFormatters: [
-                                        LengthLimitingTextInputFormatter(12),
-                                        FilteringTextInputFormatter.digitsOnly,
-                                      ],
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return "Please enter the amount";
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 20),
-                              DropdownButton(
-                                isExpanded: true,
-                                icon: Icon(Icons.arrow_forward_ios),
-                                hint: Text(
-                                  "Choose a category",
-                                  style: TextStyle(color: Color(0xffd5d5d5)),
-                                ),
-                                value: selectedCategory,
-                                items: [
-                                  ...categories.map((item) {
-                                    return DropdownMenuItem<int>(
-                                      value: item.key as int,
-                                      child: Row(
-                                        children: [
-                                          SizedBox(width: 12),
-                                          Icon(
-                                            IconData(
-                                              item.iconCode,
-                                              fontFamily: 'MaterialIcons',
-                                            ),
-                                          ),
-                                          SizedBox(width: 10),
-                                          Text(
-                                            item.name,
-                                            style: TextTheme.of(
-                                              context,
-                                            ).bodyLarge,
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }).toList(),
-                                  DropdownMenuItem<int>(
-                                    value: -1,
-                                    child: Container(
-                                      padding: EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                        color: Color(0xffd5d5d5),
-                                        borderRadius: BorderRadius.circular(5),
-                                      ),
-
-                                      child: Row(
-                                        children: [
-                                          SizedBox(width: 12),
-                                          Icon(Icons.add),
-                                          SizedBox(width: 10),
-                                          Text(
-                                            "Add new Category",
-                                            style: TextTheme.of(
-                                              context,
-                                            ).bodyLarge,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                                onChanged: (value) {
-                                  if (value == -1) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => AddCategory(),
-                                      ),
-                                    );
-                                    setState(() {
-                                      selectedCategory = null;
-                                    });
-                                  } else {
-                                    setState(() {
-                                      selectedCategory = value;
-                                    });
-                                  }
-                                },
-                              ),
-                              SizedBox(height: 10),
-                              TextFormField(
-                                controller: dateController,
-                                onTap: () {
-                                  _selectDate(context);
-                                },
-                                readOnly: true,
-                                decoration: InputDecoration(
-                                  prefixIcon: IconButton(
-                                    onPressed: () {},
-                                    icon: Icon(Icons.edit_calendar),
-                                  ),
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return "Please give a date";
-                                  }
-                                  return null;
-                                },
-                              ),
-                              SizedBox(height: 10),
-                              TextFormField(
-                                controller: noteController,
-                                decoration: InputDecoration(
-                                  prefixIcon: Icon(Icons.notes),
-                                  hint: Text(
-                                    "Notes",
-                                    style: TextStyle(color: Color(0xffd5d5d5)),
-                                  ),
-                                ),
-                              ),
-                            ],
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            color: AppColors.primaryTealColor,
+                          ),
+                          child: Text(
+                            "  INR  ",
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
-                      ),
+                        SizedBox(width: 20),
+                        SizedBox(
+                          width: 165,
+                          child: TextFormField(
+                            controller: amountController,
+                            keyboardType: TextInputType.number,
+                            autofocus: true,
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(12),
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Please enter the amount";
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (formKey.currentState!.validate()) {
-                          saveExpense();
+                    SizedBox(height: 20),
+                    DropdownButton(
+                      isExpanded: true,
+                      icon: Icon(Icons.arrow_forward_ios),
+                      hint: Text(
+                        "Choose a category",
+                        style: TextStyle(color: Color(0xffd5d5d5)),
+                      ),
+                      value: selectedCategory,
+                      items: [
+                        ...categories.map((item) {
+                          return DropdownMenuItem<int>(
+                            value: item.key as int,
+                            child: Row(
+                              children: [
+                                SizedBox(width: 12),
+                                Icon(
+                                  IconData(
+                                    item.iconCode,
+                                    fontFamily: 'MaterialIcons',
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  item.name,
+                                  style: TextTheme.of(context).bodyLarge,
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                        _dropDownMenu(context),
+                      ],
+                      onChanged: (value) {
+                        if (value == -1) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => AddCategory()),
+                          );
+                          setState(() {
+                            selectedCategory = null;
+                          });
+                        } else {
+                          setState(() {
+                            selectedCategory = value;
+                          });
                         }
                       },
-                      style: AppButtons.mainPinkButton,
-                      child: Text("Add"),
+                    ),
+                    SizedBox(height: 10),
+                    TextFormField(
+                      controller: dateController,
+                      onTap: () {
+                        _selectDate(context);
+                      },
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        prefixIcon: IconButton(
+                          onPressed: () {},
+                          icon: Icon(Icons.edit_calendar),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please give a date";
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    TextFormField(
+                      controller: noteController,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.notes),
+                        hint: Text(
+                          "Notes",
+                          style: TextStyle(color: Color(0xffd5d5d5)),
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                saveExpense();
+              }
+            },
+            style: AppButtons.mainPinkButton,
+            child: Text("Add"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //dropdownMenu
+  DropdownMenuItem<int> _dropDownMenu(BuildContext context) {
+    return DropdownMenuItem<int>(
+      value: -1,
+      child: Container(
+        padding: EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: Color(0xffd5d5d5),
+          borderRadius: BorderRadius.circular(5),
+        ),
+
+        child: Row(
+          children: [
+            SizedBox(width: 12),
+            Icon(Icons.add),
+            SizedBox(width: 10),
+            Text("Add new Category", style: TextTheme.of(context).bodyLarge),
           ],
         ),
       ),

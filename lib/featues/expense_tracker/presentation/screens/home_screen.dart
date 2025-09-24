@@ -46,11 +46,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final expenseBox = Hive.box<Expense>('expenses');
 
     return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       backgroundColor: Colors.white,
       appBar: _appBar(),
       drawer: MyDrawer(user: user),
       bottomNavigationBar: bottomNav(),
-      body: _body(
+      floatingActionButton: _floatingActionButton(context),
+      body: _mainBody(
         context,
         totalSpend,
         formattedToday,
@@ -62,12 +64,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
+//floating action button
+  FloatingActionButton _floatingActionButton(BuildContext context) {
+    return FloatingActionButton(
+      backgroundColor: AppColors.primaryTealColor,
+      shape: CircleBorder(),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AddExpense(
+              onExpenseAdded: () {
+                setState(() {});
+              },
+            ),
+          ),
+        );
+      },
+      child: Icon(Icons.add, color: Colors.white),
+    );
+  }
 
   // appbar
   AppBar _appBar() => AppBar(backgroundColor: AppColors.primaryTealColor);
 
   // body
-  SafeArea _body(
+  SafeArea _mainBody(
     BuildContext context,
     double totalSpend,
     String formattedToday,
@@ -98,7 +120,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Text(
-                  "$totalSpend",
+                  "₹ $totalSpend",
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 SizedBox(height: 10),
@@ -253,7 +275,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => SpendingHistory()),
+                  MaterialPageRoute(
+                    builder: (_) => SpendingHistory(
+                      onExpenseEdited: () {
+                        setState(() {});
+                      },
+                    ),
+                  ),
                 );
               },
               icon: Icon(Icons.history, color: Colors.white),
@@ -270,21 +298,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             IconButton(
               onPressed: () {},
               icon: Icon(Icons.notifications, color: Colors.white),
-            ),
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => AddExpense(
-                      onExpenseAdded: () {
-                        setState(() {});
-                      },
-                    ),
-                  ),
-                );
-              },
-              icon: Icon(Icons.add, color: Colors.white),
             ),
           ],
         ),

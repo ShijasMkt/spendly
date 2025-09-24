@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:spendly/featues/expense_tracker/data/models/category_model.dart';
@@ -19,73 +21,117 @@ class SpendingOverview extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(automaticallyImplyLeading: false),
-      body: SafeArea(
-        child: Column(
-          children: [
-            SizedBox(height: 10),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.all(15),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
-                ),
-                child: Column(
+      body: _spendingOverviewBody(expenseBox, userID, categoryBox),
+    );
+  }
+
+  //body
+  SafeArea _spendingOverviewBody(
+    Box<Expense> expenseBox,
+    userID,
+    Box<Category> categoryBox,
+  ) {
+    return SafeArea(
+      child: Column(
+        children: [
+          SizedBox(height: 10),
+          Expanded(child: _whiteBody(expenseBox, userID, categoryBox)),
+        ],
+      ),
+    );
+  }
+
+  //whiteBody
+  Container _whiteBody(
+    Box<Expense> expenseBox,
+    userID,
+    Box<Category> categoryBox,
+  ) {
+    return Container(
+      padding: EdgeInsets.all(15),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+      ),
+      child: Column(
+        children: [
+          MyTopbar(pageName: "Spendings Overview"),
+          Expanded(
+            child: ValueListenableBuilder(
+              valueListenable: expenseBox.listenable(),
+              builder: (context, Box<Expense> box, _) {
+                final expenses = box.values
+                    .cast<Expense>()
+                    .where((expense) => expense.userID == userID)
+                    .toList();
+
+                final Map<String, double> categoryTotals = {};
+
+                for (var expense in expenses) {
+                  final category = categoryBox.get(expense.categoryID);
+                  if (category != null) {
+                    categoryTotals.update(
+                      category.name,
+                      (value) => value + expense.amount,
+                      ifAbsent: () => expense.amount,
+                    );
+                  }
+                }
+
+                if (categoryTotals.isEmpty) {
+                  return const Center(child: Text("No spendings yet"));
+                }
+                final random = Random();
+                final categoryColors = {
+                  for (var key in categoryTotals.keys)
+                    key: Color.fromARGB(
+                      255,
+                      random.nextInt(255),
+                      random.nextInt(255),
+                      random.nextInt(255),
+                    ),
+                };
+
+                return Column(
                   children: [
+                    SizedBox(height: 20),
+                    Text("Overall spending by category:"),
+                    AspectRatio(
+                      aspectRatio: 1.2,
+                      child: ExpensePieChart(
+                        categoryTotals: categoryTotals,
+                        categoryColors: categoryColors,
+                      ),
+                    ),
+                    SizedBox(height: 20),
                     Expanded(
-                      child: Column(
-                        children: [
-                          MyTopbar(pageName: "Spendings Overview"),
-                          SizedBox(height: 20),
-                          Expanded(
-                            child: ValueListenableBuilder(
-                              valueListenable: expenseBox.listenable(),
-                              builder: (context, Box<Expense> box, _) {
-                                final expenses = box.values
-                                    .cast<Expense>()
-                                    .where(
-                                      (expense) => expense.userID == userID,
-                                    )
-                                    .toList();
-
-                                final Map<String, double> categoryTotals = {};
-
-                                for (var expense in expenses) {
-                                  final category = categoryBox.get(
-                                    expense.categoryID,
-                                  );
-                                  if (category != null) {
-                                    categoryTotals.update(
-                                      category.name,
-                                      (value) => value + expense.amount,
-                                      ifAbsent: () => expense.amount,
-                                    );
-                                  }
-                                }
-
-                                if(categoryTotals.isEmpty){
-                                  return const Center(
-                                    child: Text("No spendings yet"),
-                                  );
-                                }
-
-                                return ExpensePieChart(categoryTotals: categoryTotals);
-                              },
+                      child: ListView(
+                        children: categoryTotals.entries.map((entry) {
+                          final color = categoryColors[entry.key];
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: color,
+                              radius: 8,
                             ),
-                          ),
-                        ],
+                            title: Text(entry.key),
+                            trailing: Text(
+                              "₹${entry.value.toStringAsFixed(2)}",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          );
+                        }).toList(),
                       ),
                     ),
                   ],
-                ),
-              ),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
