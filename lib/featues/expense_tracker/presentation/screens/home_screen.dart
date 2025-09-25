@@ -1,10 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:spendly/core/constants/app_colors.dart';
 import 'package:spendly/featues/expense_tracker/data/models/expense_model.dart';
-import 'package:spendly/featues/expense_tracker/data/models/user_model.dart';
 import 'package:spendly/featues/expense_tracker/presentation/functions/month_spendings.dart';
 import 'package:spendly/featues/expense_tracker/presentation/functions/today_spendings.dart';
 import 'package:spendly/featues/expense_tracker/presentation/functions/total_spendings.dart';
@@ -23,21 +23,12 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String selected = 'today';
-  late Box settingsBox;
-  late Box userBox;
   DateTime today = DateTime.now();
 
   @override
-  void initState() {
-    super.initState();
-    settingsBox = Hive.box('settingsBox');
-    userBox = Hive.box<User>('users');
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final userID = settingsBox.get('currentUser');
-    final user = userBox.get(userID) as User?;
+    final user = FirebaseAuth.instance.currentUser;
+    final userID = user!.uid;
     final totalSpend = totalSpendings(userID);
     final todaySpend = todaySpendings(userID);
     final monthSpend = monthSpendings(userID);
@@ -49,7 +40,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       backgroundColor: Colors.white,
       appBar: _appBar(),
-      drawer: MyDrawer(user: user),
+      drawer: MyDrawer(),
       bottomNavigationBar: bottomNav(),
       floatingActionButton: _floatingActionButton(context),
       body: _mainBody(
@@ -64,7 +55,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
-//floating action button
+
+  //floating action button
   FloatingActionButton _floatingActionButton(BuildContext context) {
     return FloatingActionButton(
       backgroundColor: AppColors.primaryTealColor,

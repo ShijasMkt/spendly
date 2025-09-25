@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:spendly/featues/expense_tracker/data/models/category_model.dart';
@@ -14,18 +15,16 @@ class SpendingHistory extends StatelessWidget {
   Widget build(BuildContext context) {
     final expenseBox = Hive.box<Expense>('expenses');
     final categoryBox = Hive.box<Category>('categories');
-    final settingsBox = Hive.box('settingsBox');
 
     return Scaffold(
       appBar: AppBar(automaticallyImplyLeading: false),
-      body: _spendingHistoryBody(expenseBox, settingsBox, categoryBox),
+      body: _spendingHistoryBody(expenseBox, categoryBox),
     );
   }
 
   //body
   SafeArea _spendingHistoryBody(
     Box<Expense> expenseBox,
-    Box<dynamic> settingsBox,
     Box<Category> categoryBox,
   ) {
     return SafeArea(
@@ -33,14 +32,14 @@ class SpendingHistory extends StatelessWidget {
         children: [
           SizedBox(height: 10),
           Expanded(
-            child: _whiteBody(expenseBox, settingsBox, categoryBox),
+            child: _whiteBody(expenseBox, categoryBox),
           ),
         ],
       ),
     );
   }
   //whiteBody
-  Container _whiteBody(Box<Expense> expenseBox, Box<dynamic> settingsBox, Box<Category> categoryBox) {
+  Container _whiteBody(Box<Expense> expenseBox, Box<Category> categoryBox) {
     return Container(
             padding: EdgeInsets.all(15),
             width: double.infinity,
@@ -59,7 +58,8 @@ class SpendingHistory extends StatelessWidget {
                   child: ValueListenableBuilder(
                     valueListenable: expenseBox.listenable(),
                     builder: (context, Box<Expense> box, _) {
-                      final userID = settingsBox.get('currentUser');
+                      final user = FirebaseAuth.instance.currentUser;
+                      final userID = user!.uid;
 
                       var expenses = box.values
                           .cast<Expense>()

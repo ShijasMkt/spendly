@@ -1,5 +1,5 @@
 import 'dart:math';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:spendly/featues/expense_tracker/data/models/category_model.dart';
@@ -12,8 +12,8 @@ class SpendingOverview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final settingsBox = Hive.box('settingsBox');
-    final userID = settingsBox.get('currentUser');
+    final user = FirebaseAuth.instance.currentUser;
+    final userID=user!.uid;
     final expenseBox = Hive.box<Expense>('expenses');
     DateTime today = DateTime.now();
     today = DateTime(today.year, today.month, today.day);

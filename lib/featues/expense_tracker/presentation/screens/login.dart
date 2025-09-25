@@ -1,11 +1,10 @@
+import 'package:email_validator/email_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:spendly/core/auth/auth_provider.dart';
 import 'package:spendly/core/constants/app_buttons.dart';
 import 'package:spendly/core/constants/app_colors.dart';
-import 'package:spendly/featues/expense_tracker/data/models/user_model.dart';
 import 'package:spendly/featues/expense_tracker/presentation/screens/home_screen.dart';
 import 'package:spendly/featues/expense_tracker/presentation/screens/register.dart';
 
@@ -17,42 +16,26 @@ class Login extends ConsumerStatefulWidget {
 }
 
 class _LoginState extends ConsumerState<Login> {
+  bool _isLoading = false;
   @override
   Widget build(BuildContext context) {
     final GlobalKey<FormState> formkey = GlobalKey<FormState>();
-    final TextEditingController userNameController = TextEditingController();
+    final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
 
     Future<void> checkLogin() async {
-      final userBox = Hive.box<User>('users');
-      final settingsBox = Hive.box('settingsBox');
-      final secureStorage = const FlutterSecureStorage();
-
-      final userName = userNameController.text.trim();
-      final enteredPassword = passwordController.text.trim();
-
-      final existingUser = userBox.values
-          .cast<User>()
-          .where((user) => user.uName == userName)
-          .toList();
-
-      if (existingUser.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.red,
-            content: Text("User not found!"),
-          ),
+      setState(() {
+        _isLoading=true;
+      });
+      try {
+        final enteredEmail = emailController.text.trim();
+        final enteredPassword = passwordController.text.trim();
+        final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: enteredEmail,
+          password: enteredPassword,
         );
-      } else {
-        final user = existingUser.first;
-
-        final storedPassword = await secureStorage.read(
-          key: 'password_${user.id}',
-        );
-        if (storedPassword == enteredPassword) {
-          settingsBox.put('isLoggedIn', true);
-          settingsBox.put('currentUser', user.id);
-          ref.read(authProvider.notifier).login();
+        if (mounted) {
+          ref.read(authProvider.notifier).login(userCredential);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(backgroundColor: Colors.green, content: Text("Welcome!")),
           );
@@ -61,23 +44,26 @@ class _LoginState extends ConsumerState<Login> {
             MaterialPageRoute(builder: (_) => HomeScreen()),
             (route) => false,
           );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: Colors.red,
-              content: Text("Enter correct password!"),
-            ),
-          );
+        }
+      } on FirebaseAuthException catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(backgroundColor: Colors.red, content: Text("Login Failed ${e.code}")),
+        );
+      } finally {
+        if(mounted){
+          setState(() {
+            _isLoading=false;
+          });
         }
       }
     }
 
     return Scaffold(
       appBar: AppBar(backgroundColor: AppColors.primaryTealColor),
-      body: _loginBody(
+      body:  _isLoading? Center(child: CircularProgressIndicator(),): _loginBody(
         formkey,
         context,
-        userNameController,
+        emailController,
         passwordController,
         checkLogin,
       ),
@@ -88,7 +74,7 @@ class _LoginState extends ConsumerState<Login> {
   SafeArea _loginBody(
     GlobalKey<FormState> formkey,
     BuildContext context,
-    TextEditingController userNameController,
+    TextEditingController emailController,
     TextEditingController passwordController,
     Future<void> Function() checkLogin,
   ) {
@@ -118,17 +104,19 @@ class _LoginState extends ConsumerState<Login> {
               SizedBox(height: 30),
               TextFormField(
                 style: TextStyle(color: Colors.white),
-                controller: userNameController,
-                keyboardType: TextInputType.name,
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  hintText: "Enter your username",
+                  hintText: "Enter your email",
                   hintStyle: TextStyle(color: Colors.white),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
                 ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
+                  if (value == null ||
+                      value.isEmpty ||
+                      !EmailValidator.validate(value)) {
                     return "Please enter a valid username";
                   }
                   return null;

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -6,7 +7,6 @@ import 'package:spendly/core/constants/app_buttons.dart';
 import 'package:spendly/core/constants/app_colors.dart';
 import 'package:spendly/featues/expense_tracker/data/models/category_model.dart';
 import 'package:spendly/featues/expense_tracker/data/models/expense_model.dart';
-import 'package:spendly/featues/expense_tracker/data/models/user_model.dart';
 import 'package:spendly/featues/expense_tracker/presentation/screens/add_category.dart';
 import 'package:spendly/featues/expense_tracker/presentation/widgets/my_topbar.dart';
 
@@ -27,9 +27,6 @@ class _AddExpenseState extends State<AddExpense> {
   final expenseBox = Hive.box<Expense>('expenses');
   final categoryBox = Hive.box<Category>('categories');
 
-  late Box settingsBox;
-  late Box userBox;
-
   int? selectedCategory;
   DateTime? selectedDate;
   DateTime today = DateTime.now();
@@ -39,8 +36,6 @@ class _AddExpenseState extends State<AddExpense> {
     super.initState();
     selectedDate = DateTime(today.year, today.month, today.day);
     dateController.text = DateFormat('dd-MM-yyyy').format(today);
-    settingsBox = Hive.box('settingsBox');
-    userBox = Hive.box<User>('users');
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -61,7 +56,8 @@ class _AddExpenseState extends State<AddExpense> {
 
   void saveExpense() {
     final amount = double.parse(amountController.text.trim());
-    final userID = settingsBox.get('currentUser');
+    final user = FirebaseAuth.instance.currentUser;
+    final userID = user!.uid;
 
     final newExpense = Expense(
       userID: userID,

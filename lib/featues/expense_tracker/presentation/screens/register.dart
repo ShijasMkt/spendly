@@ -1,11 +1,10 @@
+import 'package:email_validator/email_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:spendly/core/auth/auth_provider.dart';
 import 'package:spendly/core/constants/app_buttons.dart';
 import 'package:spendly/core/constants/app_colors.dart';
-import 'package:spendly/featues/expense_tracker/data/models/user_model.dart';
 import 'package:spendly/featues/expense_tracker/presentation/screens/home_screen.dart';
 
 class Register extends ConsumerStatefulWidget {
@@ -16,65 +15,66 @@ class Register extends ConsumerStatefulWidget {
 }
 
 class _RegisterState extends ConsumerState<Register> {
+  bool _isLoading = false;
   @override
   Widget build(BuildContext context) {
     final GlobalKey<FormState> formkey = GlobalKey<FormState>();
-    final TextEditingController uNameController = TextEditingController();
+    final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
 
     Future<void> saveUser() async {
-      final userBox = Hive.box<User>('users');
-      final settingsBox = Hive.box('settingsBox');
-      final secureStorage = const FlutterSecureStorage();
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        final email = emailController.text.trim();
+        final password = passwordController.text.trim();
+        final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
 
-      final userName = uNameController.text.trim();
-      final password = passwordController.text.trim();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.green,
+              content: Text("User registered!"),
+            ),
+          );
 
-      final existingUser = userBox.values
-          .cast<User>()
-          .where((user) => user.uName == userName)
-          .toList();
+          ref.read(authProvider.notifier).login(userCredential);
 
-      if (existingUser.isNotEmpty) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Username already exists!")));
-        return;
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => HomeScreen()),
+            (route) => false,
+          );
+        }
+      } on FirebaseAuthException catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red,
+            content: Text("Error: ${e.message}"),
+          ),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
       }
-
-      final userID = DateTime.now().microsecondsSinceEpoch.toString();
-      final newUser = User(id: userID, uName: userName);
-
-      await secureStorage.write(key: 'password_$userID', value: password);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.green,
-          content: Text("User registered!"),
-        ),
-      );
-      userBox.put(userID, newUser);
-
-      settingsBox.put('isLoggedIn', true);
-      settingsBox.put('currentUser', userID);
-
-      ref.read(authProvider.notifier).login();
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => HomeScreen()),
-        (route) => false,
-      );
     }
 
     return Scaffold(
       appBar: _registerAppBar(),
-      body: _registerBody(
-        formkey,
-        context,
-        uNameController,
-        passwordController,
-        saveUser,
-      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _registerBody(
+              formkey,
+              context,
+              emailController,
+              passwordController,
+              saveUser,
+            ),
     );
   }
 
@@ -90,7 +90,7 @@ class _RegisterState extends ConsumerState<Register> {
   SafeArea _registerBody(
     GlobalKey<FormState> formkey,
     BuildContext context,
-    TextEditingController uNameController,
+    TextEditingController emailController,
     TextEditingController passwordController,
     Future<void> Function() saveUser,
   ) {
@@ -120,18 +120,20 @@ class _RegisterState extends ConsumerState<Register> {
               SizedBox(height: 30),
               TextFormField(
                 style: TextStyle(color: Colors.white),
-                controller: uNameController,
+                controller: emailController,
                 keyboardType: TextInputType.name,
                 decoration: InputDecoration(
-                  hintText: "Enter a username",
+                  hintText: "Enter a email",
                   hintStyle: TextStyle(color: Colors.white),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
                 ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please enter a valid name";
+                  if (value == null ||
+                      value.isEmpty ||
+                      !EmailValidator.validate(value)) {
+                    return "Please enter a valid email";
                   }
                   return null;
                 },
@@ -151,6 +153,9 @@ class _RegisterState extends ConsumerState<Register> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "Please enter a password";
+                  }
+                  if (value.length < 6) {
+                    return "Please enter minimum 6 characters";
                   }
                   return null;
                 },

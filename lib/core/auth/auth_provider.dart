@@ -1,29 +1,25 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
-class AuthNotifier extends StateNotifier<bool> {
-  AuthNotifier() : super(false) {
-    _loadLoginStatus();
+class AuthNotifier extends StateNotifier<User?> {
+  
+  AuthNotifier() : super(FirebaseAuth.instance.currentUser) {
+    FirebaseAuth.instance.authStateChanges().listen((user){
+      state = user;
+    });
   }
 
-  final Box settingsBox=Hive.box('settingsBox');
-
-  void _loadLoginStatus() {
-    final loggedIn = settingsBox.get('isLoggedIn', defaultValue: false) as bool;
-    state = loggedIn;
+  Future<void> login(UserCredential userCredential ) async{
+    state = userCredential.user;
   }
 
-  void login() {
-    settingsBox.put('isLoggedIn', true);
-    state = true;
+  Future<void> logout() async{ 
+    FirebaseAuth.instance.signOut();
+    state=null;
   }
-
-  void logout() {
-    settingsBox.put('isLoggedIn', false);
-    state = false;
-  }
+  
 }
 
-final authProvider = StateNotifierProvider<AuthNotifier, bool>((ref) {
+final authProvider = StateNotifierProvider<AuthNotifier, User?>((ref) {
   return AuthNotifier();
 });
