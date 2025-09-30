@@ -2,18 +2,26 @@ import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:spendly/core/constants/app_colors.dart';
 import 'package:spendly/featues/category/data/models/category_model.dart';
 import 'package:spendly/featues/expense/data/models/expense_model.dart';
 import 'package:spendly/featues/expense/presentation/widgets/expense_pie_chart.dart';
 import 'package:spendly/featues/dashboard/presentation/widgets/my_topbar.dart';
 
-class SpendingOverview extends StatelessWidget {
+class SpendingOverview extends StatefulWidget {
   const SpendingOverview({super.key});
+
+  @override
+  State<SpendingOverview> createState() => _SpendingOverviewState();
+}
+
+class _SpendingOverviewState extends State<SpendingOverview> {
+  Set<String> selected = {'today'};
 
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final userID=user!.uid;
+    final userID = user!.uid;
     final expenseBox = Hive.box<Expense>('expenses');
     DateTime today = DateTime.now();
     today = DateTime(today.year, today.month, today.day);
@@ -21,7 +29,7 @@ class SpendingOverview extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(automaticallyImplyLeading: false),
-      body: _spendingOverviewBody(expenseBox, userID, categoryBox),
+      body: _spendingOverviewBody(expenseBox, userID, categoryBox, today),
     );
   }
 
@@ -30,12 +38,13 @@ class SpendingOverview extends StatelessWidget {
     Box<Expense> expenseBox,
     userID,
     Box<Category> categoryBox,
+    DateTime today,
   ) {
     return SafeArea(
       child: Column(
         children: [
           SizedBox(height: 10),
-          Expanded(child: _whiteBody(expenseBox, userID, categoryBox)),
+          Expanded(child: _whiteBody(expenseBox, userID, categoryBox, today)),
         ],
       ),
     );
@@ -46,6 +55,7 @@ class SpendingOverview extends StatelessWidget {
     Box<Expense> expenseBox,
     userID,
     Box<Category> categoryBox,
+    DateTime today,
   ) {
     return Container(
       padding: EdgeInsets.all(15),
@@ -60,14 +70,67 @@ class SpendingOverview extends StatelessWidget {
       child: Column(
         children: [
           MyTopbar(pageName: "Spendings Overview"),
+          SizedBox(height: 10),
+          SegmentedButton<String>(
+            showSelectedIcon: false,
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return AppColors.secondaryPinkColor;
+                }
+                return Color(0xffd5d5d5);
+              }),
+              foregroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return Colors.white;
+                }
+                return AppColors.secondaryPinkColor;
+              }),
+              side: WidgetStatePropertyAll(BorderSide.none),
+              padding: WidgetStatePropertyAll(EdgeInsets.all(15)),
+            ),
+            segments: [
+              ButtonSegment(value: "today", label: Text("Today")),
+              ButtonSegment(value: "month", label: Text("Month")),
+              ButtonSegment(value: "all", label: Text("All")),
+            ],
+            selected: selected,
+            onSelectionChanged: (newSelection) {
+              setState(() {
+                selected = newSelection;
+              });
+            },
+          ),
           Expanded(
             child: ValueListenableBuilder(
               valueListenable: expenseBox.listenable(),
               builder: (context, Box<Expense> box, _) {
-                final expenses = box.values
-                    .cast<Expense>()
-                    .where((expense) => expense.userID == userID)
-                    .toList();
+                final selectedValue = selected.first;
+                List<Expense> expenses = [];
+                if (selectedValue == "today") {
+                  expenses = expenseBox.values
+                      .cast<Expense>()
+                      .where(
+                        (expense) =>
+                            expense.userID == userID && expense.date == today,
+                      )
+                      .toList();
+                } else if (selectedValue == "month") {
+                  expenses = expenseBox.values
+                      .cast<Expense>()
+                      .where(
+                        (expense) =>
+                            expense.userID == userID &&
+                            expense.date!.month == today.month &&
+                            expense.date!.year == today.year,
+                      )
+                      .toList();
+                } else if (selectedValue == "all") {
+                  expenses = expenseBox.values
+                      .cast<Expense>()
+                      .where((expense) => expense.userID == userID)
+                      .toList();
+                }
 
                 final Map<String, double> categoryTotals = {};
 
@@ -99,7 +162,6 @@ class SpendingOverview extends StatelessWidget {
                 return Column(
                   children: [
                     SizedBox(height: 20),
-                    Text("Overall spending by category:"),
                     AspectRatio(
                       aspectRatio: 1.2,
                       child: ExpensePieChart(

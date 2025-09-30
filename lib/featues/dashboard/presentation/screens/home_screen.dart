@@ -13,6 +13,7 @@ import 'package:spendly/featues/expense/presentation/screens/spending_history.da
 import 'package:spendly/featues/expense/presentation/screens/spending_overview.dart';
 import 'package:spendly/featues/category/presentation/widgets/category_spending_builder.dart';
 import 'package:spendly/featues/dashboard/presentation/widgets/my_drawer.dart';
+import 'package:spendly/featues/notification/presentation/screens/notifcation_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -288,7 +289,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               icon: Icon(Icons.pie_chart, color: Colors.white),
             ),
             IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_)=>NotifcationScreen()));
+              },
               icon: Icon(Icons.notifications, color: Colors.white),
             ),
           ],
