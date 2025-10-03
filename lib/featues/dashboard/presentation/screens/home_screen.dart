@@ -13,6 +13,7 @@ import 'package:spendly/featues/expense/presentation/screens/spending_history.da
 import 'package:spendly/featues/expense/presentation/screens/spending_overview.dart';
 import 'package:spendly/featues/category/presentation/widgets/category_spending_builder.dart';
 import 'package:spendly/featues/dashboard/presentation/widgets/my_drawer.dart';
+import 'package:spendly/featues/notification/presentation/functions/notification_service.dart';
 import 'package:spendly/featues/notification/presentation/screens/notifcation_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -25,6 +26,15 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String selected = 'today';
   DateTime today = DateTime.now();
+
+  
+  // void initState() {
+  //   super.initState();
+  //   final user = FirebaseAuth.instance.currentUser;
+  //   if(user != null){
+  //     NotificationService.instance.testNotification();
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
