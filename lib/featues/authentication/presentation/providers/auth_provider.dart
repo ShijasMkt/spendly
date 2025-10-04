@@ -9,7 +9,7 @@ class AuthNotifier extends StateNotifier<User?> {
     });
   }
 
-  Future<void> login(UserCredential userCredential ) async{
+  Future<void> login(UserCredential userCredential ) async { 
     state = userCredential.user;
   }
 
@@ -17,6 +17,8 @@ class AuthNotifier extends StateNotifier<User?> {
     FirebaseAuth.instance.signOut();
     state=null;
   }
+
+ 
   
 }
 

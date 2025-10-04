@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:spendly/core/constants/app_colors.dart';
+import 'package:spendly/featues/category/presentation/screens/add_category.dart';
 import 'package:spendly/featues/expense/data/models/expense_model.dart';
 import 'package:spendly/featues/dashboard/presentation/functions/month_spendings.dart';
 import 'package:spendly/featues/dashboard/presentation/functions/today_spendings.dart';
@@ -288,8 +289,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               icon: Icon(Icons.pie_chart, color: Colors.white),
             ),
             IconButton(
-              onPressed: () {},
-              icon: Icon(Icons.notifications, color: Colors.white),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_)=>AddCategory()));
+              },
+              icon: Icon(Icons.category, color: Colors.white),
             ),
           ],
         ),

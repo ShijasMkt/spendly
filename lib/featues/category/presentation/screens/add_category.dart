@@ -7,7 +7,7 @@ import 'package:spendly/featues/category/presentation/widgets/custom_icon_picker
 import 'package:spendly/featues/dashboard/presentation/widgets/my_topbar.dart';
 
 class AddCategory extends StatefulWidget {
-  const AddCategory({super.key});
+  const AddCategory({super.key,});
 
   @override
   State<AddCategory> createState() => _AddCategoryState();
