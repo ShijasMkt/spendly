@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spendly/featues/authentication/presentation/providers/auth_provider.dart';
 import 'package:spendly/core/constants/app_colors.dart';
-import 'package:spendly/featues/category/presentation/screens/add_category.dart';
 import 'package:spendly/featues/dashboard/presentation/screens/onboarding_screen.dart';
-import 'package:spendly/featues/notification/presentation/functions/notification_service.dart';
 
 class MyDrawer extends ConsumerWidget {
   const MyDrawer({super.key});
@@ -31,28 +29,13 @@ class MyDrawer extends ConsumerWidget {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.add),
-            title: Text("Add Categories"),
-            onTap: () {
-              Navigator.push(context,MaterialPageRoute(builder: (_)=>AddCategory()));
-            },
-          ),
-          ListTile(
             leading: Icon(Icons.logout, color: Colors.red),
             title: Text("Logout"),
             onTap: () async{
-              await NotificationService().cancelAllNotifications();
               ref.read(authProvider.notifier).logout();
               Navigator.push(context,MaterialPageRoute(builder: (_)=>OnboardingScreen()));
             },
           ),
-          ListTile(
-            leading: Icon(Icons.notification_add),
-            title: Text("Test notifi"),
-            onTap: () {
-              NotificationService.instance.testNotification();
-            },
-          )
         ],
       ),
     );

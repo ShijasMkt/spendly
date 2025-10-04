@@ -64,7 +64,9 @@ class _AddExpenseState extends State<AddExpense> {
       amount: amount,
       date: selectedDate,
       categoryID: selectedCategory,
-      notes: noteController.text.trim().isEmpty? null :noteController.text.trim()
+      notes: noteController.text.trim().isEmpty
+          ? null
+          : noteController.text.trim(),
     );
     expenseBox.add(newExpense);
 
@@ -191,9 +193,9 @@ class _AddExpenseState extends State<AddExpense> {
                         }),
                         _dropDownMenu(context),
                       ],
-                      onChanged: (value) {
+                      onChanged: (value) async{
                         if (value == -1) {
-                          Navigator.push(
+                          await Navigator.push(
                             context,
                             MaterialPageRoute(builder: (_) => AddCategory()),
                           );

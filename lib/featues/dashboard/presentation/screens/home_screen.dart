@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:spendly/core/constants/app_colors.dart';
+import 'package:spendly/featues/category/presentation/screens/add_category.dart';
 import 'package:spendly/featues/expense/data/models/expense_model.dart';
 import 'package:spendly/featues/dashboard/presentation/functions/month_spendings.dart';
 import 'package:spendly/featues/dashboard/presentation/functions/today_spendings.dart';
@@ -13,8 +14,6 @@ import 'package:spendly/featues/expense/presentation/screens/spending_history.da
 import 'package:spendly/featues/expense/presentation/screens/spending_overview.dart';
 import 'package:spendly/featues/category/presentation/widgets/category_spending_builder.dart';
 import 'package:spendly/featues/dashboard/presentation/widgets/my_drawer.dart';
-import 'package:spendly/featues/notification/presentation/functions/notification_service.dart';
-import 'package:spendly/featues/notification/presentation/screens/notifcation_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -26,15 +25,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String selected = 'today';
   DateTime today = DateTime.now();
-
-  
-  // void initState() {
-  //   super.initState();
-  //   final user = FirebaseAuth.instance.currentUser;
-  //   if(user != null){
-  //     NotificationService.instance.testNotification();
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -300,9 +290,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             IconButton(
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_)=>NotifcationScreen()));
+                Navigator.push(context, MaterialPageRoute(builder: (_)=>AddCategory()));
               },
-              icon: Icon(Icons.notifications, color: Colors.white),
+              icon: Icon(Icons.category, color: Colors.white),
             ),
           ],
         ),
