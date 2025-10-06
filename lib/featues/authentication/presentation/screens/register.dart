@@ -2,6 +2,8 @@ import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:spendly/core/constants/app_texts.dart';
+import 'package:spendly/core/utils/app_navigations.dart';
 import 'package:spendly/featues/authentication/presentation/providers/auth_provider.dart';
 import 'package:spendly/core/constants/app_buttons.dart';
 import 'package:spendly/core/constants/app_colors.dart';
@@ -29,34 +31,34 @@ class _RegisterState extends ConsumerState<Register> {
       try {
         final email = emailController.text.trim();
         final password = passwordController.text.trim();
-        final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
+        final userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(email: email, password: password);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: Colors.green,
-              content: Text("User registered!"),
-            ),
-          );
+          context.mounted
+              ? ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: Colors.green,
+                    content: Text("User registered!"),
+                  ),
+                )
+              : null;
 
           ref.read(authProvider.notifier).login(userCredential);
 
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => HomeScreen()),
-            (route) => false,
-          );
+          context.mounted
+              ? AppNavigations().navPushAndRemove(context, HomeScreen())
+              : null;
         }
       } on FirebaseAuthException catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.red,
-            content: Text("Error: ${e.message}"),
-          ),
-        );
+        context.mounted
+            ? ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.red,
+                  content: Text("Error: ${e.message}"),
+                ),
+              )
+            : null;
       } finally {
         setState(() {
           _isLoading = false;
@@ -104,16 +106,8 @@ class _RegisterState extends ConsumerState<Register> {
             children: [
               Column(
                 children: [
-                  Text(
-                    "Let's Personalize Your Journeys",
-                    style: TextTheme.of(context).titleLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    "Tell us a bit about yourself",
-                    style: TextTheme.of(context).titleSmall,
-                    textAlign: TextAlign.center,
-                  ),
+                  AppTexts().mainHeading("Let's Personalize Your Journeys"),
+                  AppTexts().subHeading("Tell us a bit about yourself")
                 ],
               ),
 

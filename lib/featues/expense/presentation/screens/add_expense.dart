@@ -5,6 +5,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:spendly/core/constants/app_buttons.dart';
 import 'package:spendly/core/constants/app_colors.dart';
+import 'package:spendly/core/constants/app_texts.dart';
+import 'package:spendly/core/utils/app_navigations.dart';
 import 'package:spendly/featues/category/data/models/category_model.dart';
 import 'package:spendly/featues/expense/data/models/expense_model.dart';
 import 'package:spendly/featues/category/presentation/screens/add_category.dart';
@@ -166,7 +168,7 @@ class _AddExpenseState extends State<AddExpense> {
                       icon: Icon(Icons.arrow_forward_ios),
                       hint: Text(
                         "Choose a category",
-                        style: TextStyle(color: Color(0xffd5d5d5)),
+                        style: TextStyle(color: AppColors.lightGreyColor),
                       ),
                       value: selectedCategory,
                       items: [
@@ -183,21 +185,18 @@ class _AddExpenseState extends State<AddExpense> {
                                   ),
                                 ),
                                 SizedBox(width: 10),
-                                Text(
-                                  item.name,
-                                  style: TextTheme.of(context).bodyLarge,
-                                ),
+                                AppTexts().bodyLarge(item.name),
                               ],
                             ),
                           );
                         }),
                         _dropDownMenu(context),
                       ],
-                      onChanged: (value) async{
+                      onChanged: (value) async {
                         if (value == -1) {
-                          await Navigator.push(
+                          await AppNavigations().navPush(
                             context,
-                            MaterialPageRoute(builder: (_) => AddCategory()),
+                            AddCategory(),
                           );
                           setState(() {
                             selectedCategory = null;
@@ -236,7 +235,7 @@ class _AddExpenseState extends State<AddExpense> {
                         prefixIcon: Icon(Icons.notes),
                         hint: Text(
                           "Notes",
-                          style: TextStyle(color: Color(0xffd5d5d5)),
+                          style: TextStyle(color: AppColors.lightGreyColor),
                         ),
                       ),
                     ),
@@ -266,7 +265,7 @@ class _AddExpenseState extends State<AddExpense> {
       child: Container(
         padding: EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: Color(0xffd5d5d5),
+          color: AppColors.lightGreyColor,
           borderRadius: BorderRadius.circular(5),
         ),
 
@@ -275,7 +274,7 @@ class _AddExpenseState extends State<AddExpense> {
             SizedBox(width: 12),
             Icon(Icons.add),
             SizedBox(width: 10),
-            Text("Add new Category", style: TextTheme.of(context).bodyLarge),
+            AppTexts().bodyLarge("Add new Category"),
           ],
         ),
       ),

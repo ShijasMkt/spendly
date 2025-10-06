@@ -78,7 +78,7 @@ class _SpendingOverviewState extends State<SpendingOverview> {
                 if (states.contains(WidgetState.selected)) {
                   return AppColors.secondaryPinkColor;
                 }
-                return Color(0xffd5d5d5);
+                return AppColors.lightGreyColor;
               }),
               foregroundColor: WidgetStateProperty.resolveWith((states) {
                 if (states.contains(WidgetState.selected)) {

@@ -1,8 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:spendly/featues/expense/data/models/expense_model.dart';
 
-double monthSpendings(String userID) {
-  final expenseBox = Hive.box<Expense>('expenses');
+double monthSpendings(String userID, Box<Expense> expenseBox) {
   DateTime today = DateTime.now();
 
   final expenses = expenseBox.values

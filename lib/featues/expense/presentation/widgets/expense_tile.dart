@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:spendly/core/constants/app_colors.dart';
+import 'package:spendly/core/constants/app_texts.dart';
 import 'package:spendly/featues/category/data/models/category_model.dart';
 import 'package:spendly/featues/expense/data/models/expense_model.dart';
 
@@ -103,10 +103,7 @@ class _ExpenseTileState extends State<ExpenseTile> {
               IconData(expenseCategory!.iconCode, fontFamily: 'MaterialIcons'),
             ),
             Text(expenseDate),
-            Text(
-              "₹${widget.expense.amount.toString()}",
-              style: TextStyle(color: AppColors.highlightRedColor),
-            ),
+            AppTexts().smallHighlightText("₹${widget.expense.amount.toString()}"),
           ],
         ),
       ),
@@ -197,13 +194,7 @@ class _ExpenseTileState extends State<ExpenseTile> {
           runAlignment: WrapAlignment.center,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            Text(
-              "₹${widget.expense.amount.toString()}",
-              style: TextStyle(
-                color: AppColors.highlightRedColor,
-                fontSize: 20,
-              ),
-            ),
+            AppTexts().smallHighlightText("₹${widget.expense.amount.toString()}"),
             SizedBox(height: 10),
             Text(formattedDate),
             SizedBox(height: 10),

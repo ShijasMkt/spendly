@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:spendly/core/constants/app_colors.dart';
+import 'package:spendly/core/constants/app_texts.dart';
+import 'package:spendly/core/utils/app_navigations.dart';
 import 'package:spendly/featues/category/presentation/screens/add_category.dart';
 import 'package:spendly/featues/expense/data/models/expense_model.dart';
 import 'package:spendly/featues/dashboard/presentation/functions/month_spendings.dart';
@@ -30,12 +32,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     final userID = user!.uid;
-    final totalSpend = totalSpendings(userID);
-    final todaySpend = todaySpendings(userID);
-    final monthSpend = monthSpendings(userID);
+    final expenseBox = Hive.box<Expense>('expenses');
+    final totalSpend = totalSpendings(userID, expenseBox);
+    final todaySpend = todaySpendings(userID, expenseBox);
+    final monthSpend = monthSpendings(userID, expenseBox);
     String formattedToday = DateFormat('d MMMM y').format(today);
     String formattedMonth = DateFormat('MMMM y').format(today);
-    final expenseBox = Hive.box<Expense>('expenses');
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
@@ -63,14 +65,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       backgroundColor: AppColors.primaryTealColor,
       shape: CircleBorder(),
       onPressed: () {
-        Navigator.push(
+        AppNavigations().navPush(
           context,
-          MaterialPageRoute(
-            builder: (_) => AddExpense(
-              onExpenseAdded: () {
-                setState(() {});
-              },
-            ),
+          AddExpense(
+            onExpenseAdded: () {
+              setState(() {});
+            },
           ),
         );
       },
@@ -108,14 +108,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "My spendings",
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                Text(
-                  "₹ $totalSpend",
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
+                AppTexts().titleMedium("My spendings"),
+                AppTexts().titleLarge("₹ $totalSpend"),
                 SizedBox(height: 10),
               ],
             ),
@@ -157,7 +151,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   if (states.contains(WidgetState.selected)) {
                     return AppColors.secondaryPinkColor;
                   }
-                  return Color(0xffd5d5d5);
+                  return AppColors.lightGreyColor;
                 }),
                 foregroundColor: WidgetStateProperty.resolveWith((states) {
                   if (states.contains(WidgetState.selected)) {
@@ -188,18 +182,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              formattedToday,
-                              style: TextTheme.of(context).bodyLarge,
-                            ),
-                            Text(
-                              "$todaySpend",
-                              style: TextStyle(
-                                color: Colors.red.shade800,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            AppTexts().bodyLarge(formattedToday),
+                            AppTexts().highlightText("₹ $todaySpend"),
                           ],
                         ),
                         SizedBox(height: 20),
@@ -218,18 +202,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              formattedMonth,
-                              style: TextTheme.of(context).bodyLarge,
-                            ),
-                            Text(
-                              "$monthSpend",
-                              style: TextStyle(
-                                color: Colors.red.shade800,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            AppTexts().bodyLarge(formattedMonth),
+                            AppTexts().highlightText("₹ $monthSpend"),
                           ],
                         ),
                         SizedBox(height: 20),
@@ -266,14 +240,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             IconButton(
               onPressed: () {
-                Navigator.push(
+                AppNavigations().navPush(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => SpendingHistory(
-                      onExpenseEdited: () {
-                        setState(() {});
-                      },
-                    ),
+                  SpendingHistory(
+                    onExpenseEdited: () {
+                      setState(() {});
+                    },
                   ),
                 );
               },
@@ -281,16 +253,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             IconButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => SpendingOverview()),
-                );
+                AppNavigations().navPush(context, SpendingOverview());
               },
               icon: Icon(Icons.pie_chart, color: Colors.white),
             ),
             IconButton(
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_)=>AddCategory()));
+                AppNavigations().navPush(context, AddCategory());
               },
               icon: Icon(Icons.category, color: Colors.white),
             ),

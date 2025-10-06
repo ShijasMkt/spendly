@@ -1,8 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:spendly/featues/expense/data/models/expense_model.dart';
 
-double totalSpendings(String userID) {
-  final expenseBox = Hive.box<Expense>('expenses');
+double totalSpendings(String userID, Box<Expense> expenseBox) {
   final expenses = expenseBox.values
       .cast<Expense>()
       .where((expense) => expense.userID == userID)

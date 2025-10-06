@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:spendly/core/constants/app_buttons.dart';
 import 'package:spendly/core/constants/app_images.dart';
+import 'package:spendly/core/constants/app_texts.dart';
+import 'package:spendly/core/utils/app_navigations.dart';
 import 'package:spendly/featues/authentication/presentation/screens/login.dart';
 import 'package:spendly/featues/authentication/presentation/screens/register.dart';
 
@@ -27,19 +29,12 @@ class OnboardingScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(height: 20),
-            Text('Welcome to Spendly', style: TextTheme.of(context).titleLarge),
-            Text(
-              'Take control of your money with ease. Track your spending, build better habits, and make smarter financial decisions every day.',
-              style: TextTheme.of(context).titleSmall,
-              textAlign: TextAlign.center,
-            ),
+            AppTexts().mainHeading("Welcome to Spendly"),
+            AppTexts().subHeading('Take control of your money with ease. Track your spending, build better habits, and make smarter financial decisions every day.'),
             Spacer(),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => Register()),
-                );
+                AppNavigations().navPush(context, Register());
               },
               style: AppButtons.mainPinkButton,
               child: Text('Get Started'),
@@ -47,17 +42,11 @@ class OnboardingScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  'Already a member?',
-                  style: TextTheme.of(context).titleSmall,
-                ),
+                AppTexts().titleSmall('Already a member?'),
                 SizedBox(width: 5),
                 InkWell(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => Login()),
-                    );
+                    AppNavigations().navPush(context, Login());
                   },
                   child: Text(
                     'Login',

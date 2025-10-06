@@ -2,6 +2,8 @@ import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:spendly/core/constants/app_texts.dart';
+import 'package:spendly/core/utils/app_navigations.dart';
 import 'package:spendly/featues/authentication/presentation/providers/auth_provider.dart';
 import 'package:spendly/core/constants/app_buttons.dart';
 import 'package:spendly/core/constants/app_colors.dart';
@@ -25,34 +27,43 @@ class _LoginState extends ConsumerState<Login> {
 
     Future<void> checkLogin() async {
       setState(() {
-        _isLoading=true;
+        _isLoading = true;
       });
       try {
         final enteredEmail = emailController.text.trim();
         final enteredPassword = passwordController.text.trim();
-        final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: enteredEmail,
-          password: enteredPassword,
-        );
+        final userCredential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(
+              email: enteredEmail,
+              password: enteredPassword,
+            );
         if (mounted) {
           ref.read(authProvider.notifier).login(userCredential);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(backgroundColor: Colors.green, content: Text("Welcome!")),
-          );
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => HomeScreen()),
-            (route) => false,
-          );
+          context.mounted
+              ? ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: Colors.green,
+                    content: Text("Welcome!"),
+                  ),
+                )
+              : null;
+          context.mounted
+              ? AppNavigations().navPushAndRemove(context, HomeScreen())
+              : null;
         }
       } on FirebaseAuthException catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(backgroundColor: Colors.red, content: Text("Login Failed ${e.code}")),
-        );
+        context.mounted
+            ? ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.red,
+                  content: Text("Login Failed ${e.code}"),
+                ),
+              )
+            : null;
       } finally {
-        if(mounted){
+        if (mounted) {
           setState(() {
-            _isLoading=false;
+            _isLoading = false;
           });
         }
       }
@@ -60,13 +71,15 @@ class _LoginState extends ConsumerState<Login> {
 
     return Scaffold(
       appBar: AppBar(backgroundColor: AppColors.primaryTealColor),
-      body:  _isLoading? Center(child: CircularProgressIndicator(),): _loginBody(
-        formkey,
-        context,
-        emailController,
-        passwordController,
-        checkLogin,
-      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _loginBody(
+              formkey,
+              context,
+              emailController,
+              passwordController,
+              checkLogin,
+            ),
     );
   }
 
@@ -88,16 +101,8 @@ class _LoginState extends ConsumerState<Login> {
             children: [
               Column(
                 children: [
-                  Text(
-                    "Welcome Back!",
-                    style: TextTheme.of(context).titleLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    "Log in to continue your journey",
-                    style: TextTheme.of(context).titleSmall,
-                    textAlign: TextAlign.center,
-                  ),
+                  AppTexts().mainHeading("Welcome Back!"),
+                  AppTexts().subHeading("Log in to continue your journey")
                 ],
               ),
 
@@ -122,7 +127,7 @@ class _LoginState extends ConsumerState<Login> {
                   return null;
                 },
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 10,),
               TextFormField(
                 style: TextStyle(color: Colors.white),
                 controller: passwordController,
